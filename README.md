@@ -20,7 +20,7 @@ Role Variables
   * nginxのバージョンを確認して指定すること
     * https://nginx.org/en/download.html
 
-```yaml
+```yaml:inventory
 all:
   hosts:
     hoge:
