@@ -1,2 +1,100 @@
----
-# tasks file for test
+-
+# tasks file for nginx-install
+- name: 'Naxsiダウンロード'
+  get_url:
+    url: https://github.com/nbs-system/naxsi/archive/{{ naxsi_version }}.zip
+    dest: "{{ naxsi_zip_path }}"
+    mode: 0644
+    force: yes
+  become: yes
+- name: 'Naxsi旧展開ファイル削除'
+  file:
+    path: "{{ naxsi_zip_extract_path }}"
+    state: absent
+  become: yes
+- name: 'Naxsi解凍'
+  unarchive:
+      src: "{{ naxsi_zip_path }}"
+      dest: "{{ naxsi_zip_extract_path }}"
+      remote_src: yes
+  become: yes
+
+- name: 'Nginxダウンロード'
+  get_url:
+    url: https://nginx.org/download/nginx-{{ nginx_version}}.tar.gz
+    dest: /usr/local/src/nginx.tar.gz
+    mode: 0644
+    force: yes
+  become: yes
+- name: 'Nginx旧展開ファイル削除'
+  file:
+    path: "{{ nginx_zip_extract_path }}"
+    state: absent
+  become: yes
+- name: 'Nginx解凍'
+  unarchive:
+      src: "{{ nginx_zip_path }}"
+      dest: "{{ nginx_zip_extract_path }}"
+  become: yes
+
+- name: 'ビルド'
+  make:
+    chdir: "{{ nginx_zip_extract_path }}"
+    params:
+      prefix: /etc/nginx
+      sbin-path: /usr/sbin/nginx
+      modules-path: /usr/lib/nginx/modules
+      add-module: ../naxsi/naxsi-master/naxsi_src
+      conf-path: /etc/nginx/nginx.conf
+      error-log-path: /var/log/nginx/error.log
+      http-log-path: /var/log/nginx/access.log
+      pid-path: /var/run/nginx.pid
+      lock-path: /var/run/nginx.lock
+      http-client-body-temp-path: /var/cache/nginx/client_temp
+      http-proxy-temp-path: /var/cache/nginx/proxy_temp
+      http-fastcgi-temp-path: /var/cache/nginx/fastcgi_temp
+      http-uwsgi-temp-path: /var/cache/nginx/uwsgi_temp
+      http-scgi-temp-path: /var/cache/nginx/scgi_temp
+      user: nginx
+      group: nginx
+      with-http_ssl_module:
+      with-http_realip_module:
+      with-http_addition_module:
+      with-http_sub_module:
+      with-http_gunzip_module:
+      with-http_gzip_static_module:
+      with-http_random_index_module:
+      with-http_secure_link_module:
+      with-http_stub_status_module:
+      with-http_auth_request_module:
+      with-http_xslt_module: dynamic
+      with-http_image_filter_module: dynamic
+      with-http_geoip_module: dynamic
+      with-http_perl_module: dynamic
+      with-threads:
+      with-stream:
+      with-stream_ssl_module:
+      with-http_slice_module:
+      with-mail:
+      with-mail_ssl_module:
+      with-file-aio:
+      with-http_v2_module:
+  become: yes
+
+- name: 'nginx停止'
+  service:
+    name: nginx
+    state: stopped
+  become: yes
+
+- name: 'インストール'
+  make:
+    chdir: "{{ nginx_zip_extract_path }}"
+    target: install
+  become: yes
+
+- name: 'nginx起動'
+  service:
+    name: nginx
+    state: started
+  become: yes

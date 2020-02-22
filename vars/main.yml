@@ -1,2 +1,6 @@
 ---
-# vars file for test
+# vars file for nginx-install
+naxsi_zip_path: /usr/local/src/naxsi-master.zip
+naxsi_zip_extract_path: /usr/local/src/naxsi
+nginx_zip_path: /usr/local/src/nginx.tar.gz
+nginx_zip_extract_path: /usr/local/src/nginx
